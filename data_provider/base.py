@@ -304,9 +304,11 @@ class DataFetcherManager:
         初始化默認數據源列表
 
         優先級動態調整邏輯：
-        - 如果配置了 TUSHARE_TOKEN：Tushare 優先級提升為 0（最高）
+        - FinMindFetcher 始終為最高優先級（台股專用，Priority -1）
+        - 如果配置了 TUSHARE_TOKEN：Tushare 優先級提升為 0
         - 否則按默認優先級：
-          0. EfinanceFetcher (Priority 0) - 最高優先級
+         -1. FinMindFetcher (Priority -1) - 台股最高優先級
+          0. EfinanceFetcher (Priority 0)
           1. AkshareFetcher (Priority 1)
           2. PytdxFetcher (Priority 2) - 通達信
           2. TushareFetcher (Priority 2)
@@ -325,6 +327,7 @@ class DataFetcherManager:
         config = get_config()
 
         # 創建所有數據源實例（優先級在各 Fetcher 的 __init__ 中確定）
+        finmind = FinMindFetcher(api_token=config.finmind_token)  # 台股專用，Priority -1
         efinance = EfinanceFetcher()
         akshare = AkshareFetcher()
         tushare = TushareFetcher()  # 會根據 Token 配置自動調整優先級
@@ -334,6 +337,7 @@ class DataFetcherManager:
 
         # 初始化數據源列表
         self._fetchers = [
+            finmind,
             efinance,
             akshare,
             tushare,

@@ -4,7 +4,7 @@ import HomePage from './pages/HomePage';
 import NotFoundPage from './pages/NotFoundPage';
 import './App.css';
 
-// 侧边导航图标
+// 側邊導航圖標
 const HomeIcon: React.FC<{ active?: boolean }> = ({active}) => (
     <svg className="w-6 h-6" fill={active ? 'currentColor' : 'none'} stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
@@ -30,25 +30,25 @@ type DockItem = {
 const NAV_ITEMS: DockItem[] = [
     {
         key: 'home',
-        label: '首页',
+        label: '首頁',
         to: '/',
         icon: HomeIcon,
     },
 ];
 
-// Dock 导航栏
+// Dock 導航列
 const DockNav: React.FC = () => {
     return (
-        <aside className="dock-nav" aria-label="主导航">
+        <aside className="dock-nav" aria-label="主導航">
             <div className="dock-surface">
-                <NavLink to="/" className="dock-logo" title="首页" aria-label="首页">
+                <NavLink to="/" className="dock-logo" title="首頁" aria-label="首頁">
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
                               d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
                     </svg>
                 </NavLink>
 
-                <nav className="dock-items" aria-label="页面">
+                <nav className="dock-items" aria-label="頁面">
                     {NAV_ITEMS.map((item) => {
                         const Icon = item.icon;
                         return (
@@ -70,7 +70,7 @@ const DockNav: React.FC = () => {
                     <button
                         type="button"
                         className="dock-item is-placeholder"
-                        title="设置（即将推出）"
+                        title="設定（即將推出）"
                         aria-disabled="true"
                         disabled
                     >
@@ -86,10 +86,10 @@ const App: React.FC = () => {
     return (
         <Router>
             <div className="flex min-h-screen bg-base">
-                {/* Dock 导航 */}
+                {/* Dock 導航 */}
                 <DockNav/>
 
-                {/* 主内容区 */}
+                {/* 主內容區 */}
                 <main className="flex-1 dock-safe-area">
                     <Routes>
                         <Route path="/" element={<HomePage/>}/>

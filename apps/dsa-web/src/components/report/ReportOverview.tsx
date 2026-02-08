@@ -10,21 +10,21 @@ interface ReportOverviewProps {
 }
 
 /**
- * 报告概览区组件 - 终端风格
+ * 報告概覽區組件 - 終端風格
  */
 export const ReportOverview: React.FC<ReportOverviewProps> = ({
   meta,
   summary
 }) => {
-  // 根据涨跌幅获取颜色
+  // 根據漲跌幅獲取顏色
   const getPriceChangeColor = (changePct: number | undefined): string => {
     if (changePct === undefined || changePct === null) return 'text-muted';
-    if (changePct > 0) return 'text-[#ff4d4d]'; // 红涨
-    if (changePct < 0) return 'text-[#00d46a]'; // 绿跌
+    if (changePct > 0) return 'text-[#ff4d4d]'; // 紅漲
+    if (changePct < 0) return 'text-[#00d46a]'; // 綠跌
     return 'text-muted';
   };
 
-  // 格式化涨跌幅
+  // 格式化漲跌幅
   const formatChangePct = (changePct: number | undefined): string => {
     if (changePct === undefined || changePct === null) return '--';
     const sign = changePct > 0 ? '+' : '';
@@ -33,11 +33,11 @@ export const ReportOverview: React.FC<ReportOverviewProps> = ({
 
   return (
     <div className="space-y-4">
-      {/* 主信息区 - 两列布局 */}
+      {/* 主資訊區 - 兩列佈局 */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        {/* 左侧：股票信息与结论 */}
+        {/* 左側：股票資訊與結論 */}
         <div className="lg:col-span-2 space-y-4">
-          {/* 股票头部 */}
+          {/* 股票頭部 */}
           <Card variant="gradient" padding="md">
             <div className="flex items-start justify-between mb-4">
               <div className="flex-1">
@@ -45,7 +45,7 @@ export const ReportOverview: React.FC<ReportOverviewProps> = ({
                   <h2 className="text-2xl font-bold text-white">
                     {meta.stockName || meta.stockCode}
                   </h2>
-                  {/* 价格和涨跌幅 */}
+                  {/* 價格和漲跌幅 */}
                   {meta.currentPrice != null && (
                     <div className="flex items-baseline gap-2">
                       <span className={`text-xl font-bold font-mono ${getPriceChangeColor(meta.changePct)}`}>
@@ -71,18 +71,18 @@ export const ReportOverview: React.FC<ReportOverviewProps> = ({
               </div>
             </div>
 
-            {/* 关键结论 */}
+            {/* 關鍵結論 */}
             <div className="border-t border-white/5 pt-4">
               <span className="label-uppercase">KEY INSIGHTS</span>
               <p className="text-white text-sm leading-relaxed mt-1.5 whitespace-pre-wrap text-left">
-                {summary.analysisSummary || '暂无分析结论'}
+                {summary.analysisSummary || '暫無分析結論'}
               </p>
             </div>
           </Card>
 
-          {/* 操作建议和趋势预测 */}
+          {/* 操作建議和趨勢預測 */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            {/* 操作建议 */}
+            {/* 操作建議 */}
             <Card variant="bordered" padding="sm" hoverable>
               <div className="flex items-start gap-3">
                 <div className="w-8 h-8 rounded-lg bg-success/10 flex items-center justify-center flex-shrink-0">
@@ -91,15 +91,15 @@ export const ReportOverview: React.FC<ReportOverviewProps> = ({
                   </svg>
                 </div>
                 <div>
-                  <h4 className="text-xs font-medium text-success mb-0.5">操作建议</h4>
+                  <h4 className="text-xs font-medium text-success mb-0.5">操作建議</h4>
                   <p className="text-white text-sm font-medium">
-                    {summary.operationAdvice || '暂无建议'}
+                    {summary.operationAdvice || '暫無建議'}
                   </p>
                 </div>
               </div>
             </Card>
 
-            {/* 趋势预测 */}
+            {/* 趨勢預測 */}
             <Card variant="bordered" padding="sm" hoverable>
               <div className="flex items-start gap-3">
                 <div className="w-8 h-8 rounded-lg bg-warning/10 flex items-center justify-center flex-shrink-0">
@@ -108,9 +108,9 @@ export const ReportOverview: React.FC<ReportOverviewProps> = ({
                   </svg>
                 </div>
                 <div>
-                  <h4 className="text-xs font-medium text-warning mb-0.5">趋势预测</h4>
+                  <h4 className="text-xs font-medium text-warning mb-0.5">趨勢預測</h4>
                   <p className="text-white text-sm font-medium">
-                    {summary.trendPrediction || '暂无预测'}
+                    {summary.trendPrediction || '暫無預測'}
                   </p>
                 </div>
               </div>
@@ -118,7 +118,7 @@ export const ReportOverview: React.FC<ReportOverviewProps> = ({
           </div>
         </div>
 
-        {/* 右侧：情绪指标 */}
+        {/* 右側：情緒指標 */}
         <div className="space-y-4">
           <Card variant="bordered" padding="md" className="!overflow-visible">
             <div className="text-center">

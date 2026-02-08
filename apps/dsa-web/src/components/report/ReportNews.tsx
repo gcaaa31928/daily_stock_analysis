@@ -10,7 +10,7 @@ interface ReportNewsProps {
 }
 
 /**
- * 资讯区组件 - 终端风格
+ * 資訊區組件 - 終端風格
  */
 export const ReportNews: React.FC<ReportNewsProps> = ({ queryId, limit = 20 }) => {
   const [isLoading, setIsLoading] = useState(false);
@@ -26,7 +26,7 @@ export const ReportNews: React.FC<ReportNewsProps> = ({ queryId, limit = 20 }) =
       const response = await historyApi.getNews(queryId, limit);
       setItems(response.items || []);
     } catch (err) {
-      setError(err instanceof Error ? err.message : '加载资讯失败');
+      setError(err instanceof Error ? err.message : '載入資訊失敗');
     } finally {
       setIsLoading(false);
     }
@@ -50,7 +50,7 @@ export const ReportNews: React.FC<ReportNewsProps> = ({ queryId, limit = 20 }) =
       <div className="flex items-center justify-between mb-3">
         <div className="mb-3 flex items-baseline gap-2">
           <span className="label-uppercase">NEWS FEED</span>
-          <h3 className="text-base font-semibold text-white">相关资讯</h3>
+          <h3 className="text-base font-semibold text-white">相關資訊</h3>
         </div>
         <div className="flex items-center gap-2">
           {isLoading && (
@@ -61,7 +61,7 @@ export const ReportNews: React.FC<ReportNewsProps> = ({ queryId, limit = 20 }) =
             onClick={fetchNews}
             className="text-xs text-cyan hover:text-white transition-colors"
           >
-            刷新
+            重新整理
           </button>
         </div>
       </div>
@@ -74,7 +74,7 @@ export const ReportNews: React.FC<ReportNewsProps> = ({ queryId, limit = 20 }) =
             onClick={fetchNews}
             className="text-xs text-cyan hover:text-white transition-colors"
           >
-            重试
+            重試
           </button>
         </div>
       )}
@@ -82,12 +82,12 @@ export const ReportNews: React.FC<ReportNewsProps> = ({ queryId, limit = 20 }) =
       {isLoading && !error && (
         <div className="flex items-center gap-2 text-xs text-secondary">
           <div className="w-4 h-4 border-2 border-cyan/20 border-t-cyan rounded-full animate-spin" />
-          加载资讯中...
+          載入資訊中...
         </div>
       )}
 
       {!isLoading && !error && items.length === 0 && (
-        <div className="text-xs text-muted">暂无相关资讯</div>
+        <div className="text-xs text-muted">暫無相關資訊</div>
       )}
 
       {!isLoading && !error && items.length > 0 && (
@@ -115,7 +115,7 @@ export const ReportNews: React.FC<ReportNewsProps> = ({ queryId, limit = 20 }) =
                     rel="noopener noreferrer"
                     className="text-xs text-cyan hover:text-white transition-colors inline-flex items-center gap-1 whitespace-nowrap"
                   >
-                    跳转
+                    前往
                     <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path
                         strokeLinecap="round"

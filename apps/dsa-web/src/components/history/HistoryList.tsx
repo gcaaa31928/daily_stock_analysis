@@ -16,8 +16,8 @@ interface HistoryListProps {
 }
 
 /**
- * 历史记录列表组件
- * 显示最近的股票分析历史，支持点击查看详情和滚动加载更多
+ * 歷史紀錄列表組件
+ * 顯示最近的股票分析歷史，支持點擊查看詳情和滾動載入更多
  */
 export const HistoryList: React.FC<HistoryListProps> = ({
   items,
@@ -32,13 +32,13 @@ export const HistoryList: React.FC<HistoryListProps> = ({
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const loadMoreTriggerRef = useRef<HTMLDivElement>(null);
 
-  // 使用 IntersectionObserver 检测滚动到底部
+  // 使用 IntersectionObserver 檢測滾動到底部
   const handleObserver = useCallback(
     (entries: IntersectionObserverEntry[]) => {
       const target = entries[0];
-      // 只有当触发器真正可见且有更多数据时才加载
+      // 只有當觸發器真正可見且有更多數據時才載入
       if (target.isIntersecting && hasMore && !isLoading && !isLoadingMore) {
-        // 确保容器有滚动能力（内容超过容器高度）
+        // 確保容器有滾動能力（內容超過容器高度）
         const container = scrollContainerRef.current;
         if (container && container.scrollHeight > container.clientHeight) {
           onLoadMore();
@@ -55,8 +55,8 @@ export const HistoryList: React.FC<HistoryListProps> = ({
 
     const observer = new IntersectionObserver(handleObserver, {
       root: container,
-      rootMargin: '20px', // 减小预加载距离
-      threshold: 0.1, // 触发器至少 10% 可见时才触发
+      rootMargin: '20px', // 減小預載入距離
+      threshold: 0.1, // 觸發器至少 10% 可見時才觸發
     });
 
     observer.observe(trigger);
@@ -73,7 +73,7 @@ export const HistoryList: React.FC<HistoryListProps> = ({
           <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
-          历史记录
+          歷史紀錄
         </h2>
 
         {isLoading ? (
@@ -82,7 +82,7 @@ export const HistoryList: React.FC<HistoryListProps> = ({
           </div>
         ) : items.length === 0 ? (
           <div className="text-center py-6 text-muted text-xs">
-            暂无历史记录
+            暫無歷史紀錄
           </div>
         ) : (
           <div className="space-y-1.5">
@@ -95,7 +95,7 @@ export const HistoryList: React.FC<HistoryListProps> = ({
                   }`}
               >
                 <div className="flex items-center gap-2 w-full">
-                  {/* 情感分数指示条 */}
+                  {/* 情感分數指示條 */}
                   {item.sentimentScore !== undefined && (
                     <span
                       className="w-0.5 h-8 rounded-full flex-shrink-0"
@@ -136,20 +136,20 @@ export const HistoryList: React.FC<HistoryListProps> = ({
               </button>
             ))}
 
-            {/* 加载更多触发器 */}
+            {/* 載入更多觸發器 */}
             <div ref={loadMoreTriggerRef} className="h-4" />
 
-            {/* 加载更多状态 */}
+            {/* 載入更多狀態 */}
             {isLoadingMore && (
               <div className="flex justify-center py-3">
                 <div className="w-4 h-4 border-2 border-cyan/20 border-t-cyan rounded-full animate-spin" />
               </div>
             )}
 
-            {/* 没有更多数据提示 */}
+            {/* 沒有更多數據提示 */}
             {!hasMore && items.length > 0 && (
               <div className="text-center py-2 text-muted/50 text-xs">
-                已加载全部
+                已載入全部
               </div>
             )}
           </div>

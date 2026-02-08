@@ -10,19 +10,11 @@
 3. 防封禁流控策略
 
 數據源優先級（動態調整）：
-【配置了 TUSHARE_TOKEN 時】
-1. TushareFetcher (Priority 0) - 🔥 最高優先級（動態提升）
-2. EfinanceFetcher (Priority 0) - 同優先級
-3. AkshareFetcher (Priority 1) - 來自 akshare 庫
-4. PytdxFetcher (Priority 2) - 來自 pytdx 庫（通達信）
-5. BaostockFetcher (Priority 3) - 來自 baostock 庫
-6. YfinanceFetcher (Priority 4) - 來自 yfinance 庫
-
-【未配置 TUSHARE_TOKEN 時】
-1. EfinanceFetcher (Priority 0) - 最高優先級，來自 efinance 庫
+0. FinMindFetcher (Priority -1) - 🔥 台股最高優先級，來自 FinMind API
+1. EfinanceFetcher (Priority 0) - 來自 efinance 庫
 2. AkshareFetcher (Priority 1) - 來自 akshare 庫
 3. PytdxFetcher (Priority 2) - 來自 pytdx 庫（通達信）
-4. TushareFetcher (Priority 2) - 來自 tushare 庫（不可用）
+4. TushareFetcher (Priority 2) - 來自 tushare 庫（配置 Token 後提升為 Priority 0）
 5. BaostockFetcher (Priority 3) - 來自 baostock 庫
 6. YfinanceFetcher (Priority 4) - 來自 yfinance 庫
 
@@ -30,6 +22,7 @@
 """
 
 from .base import BaseFetcher, DataFetcherManager
+from .finmind_fetcher import FinMindFetcher
 from .efinance_fetcher import EfinanceFetcher
 from .akshare_fetcher import AkshareFetcher
 from .tushare_fetcher import TushareFetcher
@@ -40,6 +33,7 @@ from .yfinance_fetcher import YfinanceFetcher
 __all__ = [
     'BaseFetcher',
     'DataFetcherManager',
+    'FinMindFetcher',
     'EfinanceFetcher',
     'AkshareFetcher',
     'TushareFetcher',
