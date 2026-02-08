@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 """
 ===================================
-大盘复盘分析模块
+大盤覆盤分析模塊
 ===================================
 
-职责：
-1. 获取大盘指数数据（上证、深证、创业板）
-2. 搜索市场新闻形成复盘情报
-3. 使用大模型生成每日大盘复盘报告
+職責：
+1. 獲取大盤指數數據（上證、深證、創業板）
+2. 搜索市場新聞形成覆盤情報
+3. 使用大模型生成每日大盤覆盤報告
 """
 
 import logging
@@ -27,20 +27,20 @@ logger = logging.getLogger(__name__)
 
 @dataclass
 class MarketIndex:
-    """大盘指数数据"""
-    code: str                    # 指数代码
-    name: str                    # 指数名称
-    current: float = 0.0         # 当前点位
-    change: float = 0.0          # 涨跌点数
-    change_pct: float = 0.0      # 涨跌幅(%)
-    open: float = 0.0            # 开盘点位
-    high: float = 0.0            # 最高点位
-    low: float = 0.0             # 最低点位
-    prev_close: float = 0.0      # 昨收点位
+    """大盤指數數據"""
+    code: str                    # 指數代碼
+    name: str                    # 指數名稱
+    current: float = 0.0         # 當前點位
+    change: float = 0.0          # 漲跌點數
+    change_pct: float = 0.0      # 漲跌幅(%)
+    open: float = 0.0            # 開盤點位
+    high: float = 0.0            # 最高點位
+    low: float = 0.0             # 最低點位
+    prev_close: float = 0.0      # 昨收點位
     volume: float = 0.0          # 成交量（手）
-    amount: float = 0.0          # 成交额（元）
+    amount: float = 0.0          # 成交額（元）
     amplitude: float = 0.0       # 振幅(%)
-    
+
     def to_dict(self) -> Dict[str, Any]:
         return {
             'code': self.code,
@@ -59,41 +59,41 @@ class MarketIndex:
 
 @dataclass
 class MarketOverview:
-    """市场概览数据"""
+    """市場概覽數據"""
     date: str                           # 日期
-    indices: List[MarketIndex] = field(default_factory=list)  # 主要指数
-    up_count: int = 0                   # 上涨家数
-    down_count: int = 0                 # 下跌家数
-    flat_count: int = 0                 # 平盘家数
-    limit_up_count: int = 0             # 涨停家数
-    limit_down_count: int = 0           # 跌停家数
-    total_amount: float = 0.0           # 两市成交额（亿元）
-    # north_flow: float = 0.0           # 北向资金净流入（亿元）- 已废弃，接口不可用
-    
-    # 板块涨幅榜
-    top_sectors: List[Dict] = field(default_factory=list)     # 涨幅前5板块
-    bottom_sectors: List[Dict] = field(default_factory=list)  # 跌幅前5板块
+    indices: List[MarketIndex] = field(default_factory=list)  # 主要指數
+    up_count: int = 0                   # 上漲家數
+    down_count: int = 0                 # 下跌家數
+    flat_count: int = 0                 # 平盤家數
+    limit_up_count: int = 0             # 漲停家數
+    limit_down_count: int = 0           # 跌停家數
+    total_amount: float = 0.0           # 兩市成交額（億元）
+    # north_flow: float = 0.0           # 北向資金淨流入（億元）- 已廢棄，接口不可用
+
+    # 板塊漲幅榜
+    top_sectors: List[Dict] = field(default_factory=list)     # 漲幅前5板塊
+    bottom_sectors: List[Dict] = field(default_factory=list)  # 跌幅前5板塊
 
 
 class MarketAnalyzer:
     """
-    大盘复盘分析器
-    
+    大盤覆盤分析器
+
     功能：
-    1. 获取大盘指数实时行情
-    2. 获取市场涨跌统计
-    3. 获取板块涨跌榜
-    4. 搜索市场新闻
-    5. 生成大盘复盘报告
+    1. 獲取大盤指數實時行情
+    2. 獲取市場漲跌統計
+    3. 獲取板塊漲跌榜
+    4. 搜索市場新聞
+    5. 生成大盤覆盤報告
     """
-    
+
     def __init__(self, search_service: Optional[SearchService] = None, analyzer=None):
         """
-        初始化大盘分析器
+        初始化大盤分析器
 
         Args:
-            search_service: 搜索服务实例
-            analyzer: AI分析器实例（用于调用LLM）
+            search_service: 搜索服務實例
+            analyzer: AI分析器實例（用於調用LLM）
         """
         self.config = get_config()
         self.search_service = search_service
@@ -102,38 +102,37 @@ class MarketAnalyzer:
 
     def get_market_overview(self) -> MarketOverview:
         """
-        获取市场概览数据
-        
+        獲取市場概覽數據
+
         Returns:
-            MarketOverview: 市场概览数据对象
+            MarketOverview: 市場概覽數據對象
         """
         today = datetime.now().strftime('%Y-%m-%d')
         overview = MarketOverview(date=today)
-        
-        # 1. 获取主要指数行情
+
+        # 1. 獲取主要指數行情
         overview.indices = self._get_main_indices()
-        
-        # 2. 获取涨跌统计
+
+        # 2. 獲取漲跌統計
         self._get_market_statistics(overview)
-        
-        # 3. 获取板块涨跌榜
+
+        # 3. 獲取板塊漲跌榜
         self._get_sector_rankings(overview)
-        
-        # 4. 获取北向资金（可选）
+
+        # 4. 獲取北向資金（可選）
         # self._get_north_flow(overview)
-        
+
         return overview
 
-    
     def _get_main_indices(self) -> List[MarketIndex]:
-        """获取主要指数实时行情"""
+        """獲取主要指數實時行情"""
         indices = []
 
         try:
-            logger.info("[大盘] 获取主要指数实时行情...")
+            logger.info("[大盤] 獲取主要指數實時行情...")
 
-            # 使用 DataFetcherManager 获取指数行情
-            # Manager 会自动尝试：Akshare -> Tushare -> Yfinance
+            # 使用 DataFetcherManager 獲取指數行情
+            # Manager 會自動嘗試：Akshare -> Tushare -> Yfinance
             data_list = self.data_manager.get_main_indices()
 
             if data_list:
@@ -155,19 +154,19 @@ class MarketAnalyzer:
                     indices.append(index)
 
             if not indices:
-                logger.warning("[大盘] 所有行情数据源失败，将依赖新闻搜索进行分析")
+                logger.warning("[大盤] 所有行情數據源失敗，將依賴新聞搜索進行分析")
             else:
-                logger.info(f"[大盘] 获取到 {len(indices)} 个指数行情")
+                logger.info(f"[大盤] 獲取到 {len(indices)} 個指數行情")
 
         except Exception as e:
-            logger.error(f"[大盘] 获取指数行情失败: {e}")
+            logger.error(f"[大盤] 獲取指數行情失敗: {e}")
 
         return indices
 
     def _get_market_statistics(self, overview: MarketOverview):
-        """获取市场涨跌统计"""
+        """獲取市場漲跌統計"""
         try:
-            logger.info("[大盘] 获取市场涨跌统计...")
+            logger.info("[大盤] 獲取市場漲跌統計...")
 
             stats = self.data_manager.get_market_stats()
 
@@ -179,17 +178,17 @@ class MarketAnalyzer:
                 overview.limit_down_count = stats.get('limit_down_count', 0)
                 overview.total_amount = stats.get('total_amount', 0.0)
 
-                logger.info(f"[大盘] 涨:{overview.up_count} 跌:{overview.down_count} 平:{overview.flat_count} "
-                          f"涨停:{overview.limit_up_count} 跌停:{overview.limit_down_count} "
-                          f"成交额:{overview.total_amount:.0f}亿")
+                logger.info(f"[大盤] 漲:{overview.up_count} 跌:{overview.down_count} 平:{overview.flat_count} "
+                          f"漲停:{overview.limit_up_count} 跌停:{overview.limit_down_count} "
+                          f"成交額:{overview.total_amount:.0f}億")
 
         except Exception as e:
-            logger.error(f"[大盘] 获取涨跌统计失败: {e}")
+            logger.error(f"[大盤] 獲取漲跌統計失敗: {e}")
 
     def _get_sector_rankings(self, overview: MarketOverview):
-        """获取板块涨跌榜"""
+        """獲取板塊漲跌榜"""
         try:
-            logger.info("[大盘] 获取板块涨跌榜...")
+            logger.info("[大盤] 獲取板塊漲跌榜...")
 
             top_sectors, bottom_sectors = self.data_manager.get_sector_rankings(5)
 
@@ -197,104 +196,104 @@ class MarketAnalyzer:
                 overview.top_sectors = top_sectors
                 overview.bottom_sectors = bottom_sectors
 
-                logger.info(f"[大盘] 领涨板块: {[s['name'] for s in overview.top_sectors]}")
-                logger.info(f"[大盘] 领跌板块: {[s['name'] for s in overview.bottom_sectors]}")
+                logger.info(f"[大盤] 領漲板塊: {[s['name'] for s in overview.top_sectors]}")
+                logger.info(f"[大盤] 領跌板塊: {[s['name'] for s in overview.bottom_sectors]}")
 
         except Exception as e:
-            logger.error(f"[大盘] 获取板块涨跌榜失败: {e}")
-    
+            logger.error(f"[大盤] 獲取板塊漲跌榜失敗: {e}")
+
     # def _get_north_flow(self, overview: MarketOverview):
-    #     """获取北向资金流入"""
+    #     """獲取北向資金流入"""
     #     try:
-    #         logger.info("[大盘] 获取北向资金...")
-            
-    #         # 获取北向资金数据
+    #         logger.info("[大盤] 獲取北向資金...")
+
+    #         # 獲取北向資金數據
     #         df = ak.stock_hsgt_north_net_flow_in_em(symbol="北上")
-            
+
     #         if df is not None and not df.empty:
-    #             # 取最新一条数据
+    #             # 取最新一條數據
     #             latest = df.iloc[-1]
-    #             if '当日净流入' in df.columns:
-    #                 overview.north_flow = float(latest['当日净流入']) / 1e8  # 转为亿元
-    #             elif '净流入' in df.columns:
-    #                 overview.north_flow = float(latest['净流入']) / 1e8
-                    
-    #             logger.info(f"[大盘] 北向资金净流入: {overview.north_flow:.2f}亿")
-                
+    #             if '當日淨流入' in df.columns:
+    #                 overview.north_flow = float(latest['當日淨流入']) / 1e8  # 轉為億元
+    #             elif '淨流入' in df.columns:
+    #                 overview.north_flow = float(latest['淨流入']) / 1e8
+
+    #             logger.info(f"[大盤] 北向資金淨流入: {overview.north_flow:.2f}億")
+
     #     except Exception as e:
-    #         logger.warning(f"[大盘] 获取北向资金失败: {e}")
-    
+    #         logger.warning(f"[大盤] 獲取北向資金失敗: {e}")
+
     def search_market_news(self) -> List[Dict]:
         """
-        搜索市场新闻
-        
+        搜索市場新聞
+
         Returns:
-            新闻列表
+            新聞列表
         """
         if not self.search_service:
-            logger.warning("[大盘] 搜索服务未配置，跳过新闻搜索")
+            logger.warning("[大盤] 搜索服務未配置，跳過新聞搜索")
             return []
-        
+
         all_news = []
         today = datetime.now()
         date_str = today.strftime('%Y年%m月%d日')
 
-        # 多维度搜索
+        # 多維度搜索
         search_queries = [
-            "A股 大盘 复盘",
+            "A股 大盤 覆盤",
             "股市 行情 分析",
-            "A股 市场 热点 板块",
+            "A股 市場 熱點 板塊",
         ]
-        
+
         try:
-            logger.info("[大盘] 开始搜索市场新闻...")
-            
+            logger.info("[大盤] 開始搜索市場新聞...")
+
             for query in search_queries:
-                # 使用 search_stock_news 方法，传入"大盘"作为股票名
+                # 使用 search_stock_news 方法，傳入"大盤"作為股票名
                 response = self.search_service.search_stock_news(
                     stock_code="market",
-                    stock_name="大盘",
+                    stock_name="大盤",
                     max_results=3,
                     focus_keywords=query.split()
                 )
                 if response and response.results:
                     all_news.extend(response.results)
-                    logger.info(f"[大盘] 搜索 '{query}' 获取 {len(response.results)} 条结果")
-            
-            logger.info(f"[大盘] 共获取 {len(all_news)} 条市场新闻")
-            
+                    logger.info(f"[大盤] 搜索 '{query}' 獲取 {len(response.results)} 條結果")
+
+            logger.info(f"[大盤] 共獲取 {len(all_news)} 條市場新聞")
+
         except Exception as e:
-            logger.error(f"[大盘] 搜索市场新闻失败: {e}")
-        
+            logger.error(f"[大盤] 搜索市場新聞失敗: {e}")
+
         return all_news
-    
+
     def generate_market_review(self, overview: MarketOverview, news: List) -> str:
         """
-        使用大模型生成大盘复盘报告
-        
+        使用大模型生成大盤覆盤報告
+
         Args:
-            overview: 市场概览数据
-            news: 市场新闻列表 (SearchResult 对象列表)
-            
+            overview: 市場概覽數據
+            news: 市場新聞列表 (SearchResult 對象列表)
+
         Returns:
-            大盘复盘报告文本
+            大盤覆盤報告文本
         """
         if not self.analyzer or not self.analyzer.is_available():
-            logger.warning("[大盘] AI分析器未配置或不可用，使用模板生成报告")
+            logger.warning("[大盤] AI分析器未配置或不可用，使用模板生成報告")
             return self._generate_template_review(overview, news)
-        
-        # 构建 Prompt
+
+        # 構建 Prompt
         prompt = self._build_review_prompt(overview, news)
-        
+
         try:
-            logger.info("[大盘] 调用大模型生成复盘报告...")
-            
+            logger.info("[大盤] 調用大模型生成覆盤報告...")
+
             generation_config = {
                 'temperature': 0.7,
                 'max_output_tokens': 2048,
             }
-            
-            # 根据 analyzer 使用的 API 类型调用
+
+            # 根據 analyzer 使用的 API 類型調用
             if self.analyzer._use_openai:
                 # 使用 OpenAI 兼容 API
                 review = self.analyzer._call_openai_api(prompt, generation_config)
@@ -305,34 +304,34 @@ class MarketAnalyzer:
                     generation_config=generation_config,
                 )
                 review = response.text.strip() if response and response.text else None
-            
+
             if review:
-                logger.info(f"[大盘] 复盘报告生成成功，长度: {len(review)} 字符")
+                logger.info(f"[大盤] 覆盤報告生成成功，長度: {len(review)} 字符")
                 return review
             else:
-                logger.warning("[大盘] 大模型返回为空")
+                logger.warning("[大盤] 大模型返回為空")
                 return self._generate_template_review(overview, news)
-                
+
         except Exception as e:
-            logger.error(f"[大盘] 大模型生成复盘报告失败: {e}")
+            logger.error(f"[大盤] 大模型生成覆盤報告失敗: {e}")
             return self._generate_template_review(overview, news)
-    
+
     def _build_review_prompt(self, overview: MarketOverview, news: List) -> str:
-        """构建复盘报告 Prompt"""
-        # 指数行情信息（简洁格式，不用emoji）
+        """構建覆盤報告 Prompt"""
+        # 指數行情信息（簡潔格式，不用emoji）
         indices_text = ""
         for idx in overview.indices:
             direction = "↑" if idx.change_pct > 0 else "↓" if idx.change_pct < 0 else "-"
             indices_text += f"- {idx.name}: {idx.current:.2f} ({direction}{abs(idx.change_pct):.2f}%)\n"
-        
-        # 板块信息
+
+        # 板塊信息
         top_sectors_text = ", ".join([f"{s['name']}({s['change_pct']:+.2f}%)" for s in overview.top_sectors[:3]])
         bottom_sectors_text = ", ".join([f"{s['name']}({s['change_pct']:+.2f}%)" for s in overview.bottom_sectors[:3]])
-        
-        # 新闻信息 - 支持 SearchResult 对象或字典
+
+        # 新聞信息 - 支持 SearchResult 對象或字典
         news_text = ""
         for i, n in enumerate(news[:6], 1):
-            # 兼容 SearchResult 对象和字典
+            # 兼容 SearchResult 對象和字典
             if hasattr(n, 'title'):
                 title = n.title[:50] if n.title else ''
                 snippet = n.snippet[:100] if n.snippet else ''
@@ -340,171 +339,171 @@ class MarketAnalyzer:
                 title = n.get('title', '')[:50]
                 snippet = n.get('snippet', '')[:100]
             news_text += f"{i}. {title}\n   {snippet}\n"
-        
-        prompt = f"""你是一位专业的A/H/美股市场分析师，请根据以下数据生成一份简洁的大盘复盘报告。
 
-【重要】输出要求：
-- 必须输出纯 Markdown 文本格式
-- 禁止输出 JSON 格式
-- 禁止输出代码块
-- emoji 仅在标题处少量使用（每个标题最多1个）
+        prompt = f"""你是一位專業的A/H/美股市場分析師，請根據以下數據生成一份簡潔的大盤覆盤報告。
+
+【重要】輸出要求：
+- 必須輸出純 Markdown 文本格式
+- 禁止輸出 JSON 格式
+- 禁止輸出代碼塊
+- emoji 僅在標題處少量使用（每個標題最多1個）
 
 ---
 
-# 今日市场数据
+# 今日市場數據
 
 ## 日期
 {overview.date}
 
-## 主要指数
-{indices_text if indices_text else "暂无指数数据（接口异常）"}
+## 主要指數
+{indices_text if indices_text else "暫無指數數據（接口異常）"}
 
-## 市场概况
-- 上涨: {overview.up_count} 家 | 下跌: {overview.down_count} 家 | 平盘: {overview.flat_count} 家
-- 涨停: {overview.limit_up_count} 家 | 跌停: {overview.limit_down_count} 家
-- 两市成交额: {overview.total_amount:.0f} 亿元
+## 市場概況
+- 上漲: {overview.up_count} 家 | 下跌: {overview.down_count} 家 | 平盤: {overview.flat_count} 家
+- 漲停: {overview.limit_up_count} 家 | 跌停: {overview.limit_down_count} 家
+- 兩市成交額: {overview.total_amount:.0f} 億元
 
-## 板块表现
-领涨: {top_sectors_text if top_sectors_text else "暂无数据"}
-领跌: {bottom_sectors_text if bottom_sectors_text else "暂无数据"}
+## 板塊表現
+領漲: {top_sectors_text if top_sectors_text else "暫無數據"}
+領跌: {bottom_sectors_text if bottom_sectors_text else "暫無數據"}
 
-## 市场新闻
-{news_text if news_text else "暂无相关新闻"}
+## 市場新聞
+{news_text if news_text else "暫無相關新聞"}
 
-{"注意：由于行情数据获取失败，请主要根据【市场新闻】进行定性分析和总结，不要编造具体的指数点位。" if not indices_text else ""}
-
----
-
-# 输出格式模板（请严格按此格式输出）
-
-## 📊 {overview.date} 大盘复盘
-
-### 一、市场总结
-（2-3句话概括今日市场整体表现，包括指数涨跌、成交量变化）
-
-### 二、指数点评
-（分析上证、深证、创业板等各指数走势特点）
-
-### 三、资金动向
-（解读成交额流向的含义）
-
-### 四、热点解读
-（分析领涨领跌板块背后的逻辑和驱动因素）
-
-### 五、后市展望
-（结合当前走势和新闻，给出明日市场预判）
-
-### 六、风险提示
-（需要关注的风险点）
+{"注意：由於行情數據獲取失敗，請主要根據【市場新聞】進行定性分析和總結，不要編造具體的指數點位。" if not indices_text else ""}
 
 ---
 
-请直接输出复盘报告内容，不要输出其他说明文字。
+# 輸出格式模板（請嚴格按此格式輸出）
+
+## 📊 {overview.date} 大盤覆盤
+
+### 一、市場總結
+（2-3句話概括今日市場整體表現，包括指數漲跌、成交量變化）
+
+### 二、指數點評
+（分析上證、深證、創業板等各指數走勢特點）
+
+### 三、資金動向
+（解讀成交額流向的含義）
+
+### 四、熱點解讀
+（分析領漲領跌板塊背後的邏輯和驅動因素）
+
+### 五、後市展望
+（結合當前走勢和新聞，給出明日市場預判）
+
+### 六、風險提示
+（需要關注的風險點）
+
+---
+
+請直接輸出覆盤報告內容，不要輸出其他說明文字。
 """
         return prompt
-    
+
     def _generate_template_review(self, overview: MarketOverview, news: List) -> str:
-        """使用模板生成复盘报告（无大模型时的备选方案）"""
-        
-        # 判断市场走势
+        """使用模板生成覆盤報告（無大模型時的備選方案）"""
+
+        # 判斷市場走勢
         sh_index = next((idx for idx in overview.indices if idx.code == '000001'), None)
         if sh_index:
             if sh_index.change_pct > 1:
-                market_mood = "强势上涨"
+                market_mood = "強勢上漲"
             elif sh_index.change_pct > 0:
-                market_mood = "小幅上涨"
+                market_mood = "小幅上漲"
             elif sh_index.change_pct > -1:
                 market_mood = "小幅下跌"
             else:
-                market_mood = "明显下跌"
+                market_mood = "明顯下跌"
         else:
-            market_mood = "震荡整理"
-        
-        # 指数行情（简洁格式）
+            market_mood = "震盪整理"
+
+        # 指數行情（簡潔格式）
         indices_text = ""
         for idx in overview.indices[:4]:
             direction = "↑" if idx.change_pct > 0 else "↓" if idx.change_pct < 0 else "-"
             indices_text += f"- **{idx.name}**: {idx.current:.2f} ({direction}{abs(idx.change_pct):.2f}%)\n"
-        
-        # 板块信息
+
+        # 板塊信息
         top_text = "、".join([s['name'] for s in overview.top_sectors[:3]])
         bottom_text = "、".join([s['name'] for s in overview.bottom_sectors[:3]])
-        
-        report = f"""## 📊 {overview.date} 大盘复盘
 
-### 一、市场总结
-今日A股市场整体呈现**{market_mood}**态势。
+        report = f"""## 📊 {overview.date} 大盤覆盤
 
-### 二、主要指数
+### 一、市場總結
+今日A股市場整體呈現**{market_mood}**態勢。
+
+### 二、主要指數
 {indices_text}
 
-### 三、涨跌统计
-| 指标 | 数值 |
+### 三、漲跌統計
+| 指標 | 數值 |
 |------|------|
-| 上涨家数 | {overview.up_count} |
-| 下跌家数 | {overview.down_count} |
-| 涨停 | {overview.limit_up_count} |
+| 上漲家數 | {overview.up_count} |
+| 下跌家數 | {overview.down_count} |
+| 漲停 | {overview.limit_up_count} |
 | 跌停 | {overview.limit_down_count} |
-| 两市成交额 | {overview.total_amount:.0f}亿 |
+| 兩市成交額 | {overview.total_amount:.0f}億 |
 
-### 四、板块表现
-- **领涨**: {top_text}
-- **领跌**: {bottom_text}
+### 四、板塊表現
+- **領漲**: {top_text}
+- **領跌**: {bottom_text}
 
-### 五、风险提示
-市场有风险，投资需谨慎。以上数据仅供参考，不构成投资建议。
+### 五、風險提示
+市場有風險，投資需謹慎。以上數據僅供參考，不構成投資建議。
 
 ---
-*复盘时间: {datetime.now().strftime('%H:%M')}*
+*覆盤時間: {datetime.now().strftime('%H:%M')}*
 """
         return report
-    
+
     def run_daily_review(self) -> str:
         """
-        执行每日大盘复盘流程
-        
+        執行每日大盤覆盤流程
+
         Returns:
-            复盘报告文本
+            覆盤報告文本
         """
-        logger.info("========== 开始大盘复盘分析 ==========")
-        
-        # 1. 获取市场概览
+        logger.info("========== 開始大盤覆盤分析 ==========")
+
+        # 1. 獲取市場概覽
         overview = self.get_market_overview()
-        
-        # 2. 搜索市场新闻
+
+        # 2. 搜索市場新聞
         news = self.search_market_news()
-        
-        # 3. 生成复盘报告
+
+        # 3. 生成覆盤報告
         report = self.generate_market_review(overview, news)
-        
-        logger.info("========== 大盘复盘分析完成 ==========")
-        
+
+        logger.info("========== 大盤覆盤分析完成 ==========")
+
         return report
 
 
-# 测试入口
+# 測試入口
 if __name__ == "__main__":
     import sys
     sys.path.insert(0, '.')
-    
+
     logging.basicConfig(
         level=logging.INFO,
         format='%(asctime)s | %(levelname)-8s | %(name)-20s | %(message)s',
     )
-    
+
     analyzer = MarketAnalyzer()
-    
-    # 测试获取市场概览
+
+    # 測試獲取市場概覽
     overview = analyzer.get_market_overview()
-    print(f"\n=== 市场概览 ===")
+    print(f"\n=== 市場概覽 ===")
     print(f"日期: {overview.date}")
-    print(f"指数数量: {len(overview.indices)}")
+    print(f"指數數量: {len(overview.indices)}")
     for idx in overview.indices:
         print(f"  {idx.name}: {idx.current:.2f} ({idx.change_pct:+.2f}%)")
-    print(f"上涨: {overview.up_count} | 下跌: {overview.down_count}")
-    print(f"成交额: {overview.total_amount:.0f}亿")
-    
-    # 测试生成模板报告
+    print(f"上漲: {overview.up_count} | 下跌: {overview.down_count}")
+    print(f"成交額: {overview.total_amount:.0f}億")
+
+    # 測試生成模板報告
     report = analyzer._generate_template_review(overview, [])
-    print(f"\n=== 复盘报告 ===")
+    print(f"\n=== 覆盤報告 ===")
     print(report)

@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 """
 ===================================
-命令处理器模块
+命令處理器模塊
 ===================================
 
-包含所有机器人命令的实现。
+包含所有機器人命令的實現。
 """
 
 from bot.commands.base import BotCommand
@@ -14,7 +14,7 @@ from bot.commands.analyze import AnalyzeCommand
 from bot.commands.market import MarketCommand
 from bot.commands.batch import BatchCommand
 
-# 所有可用命令（用于自动注册）
+# 所有可用命令（用於自動註冊）
 ALL_COMMANDS = [
     HelpCommand,
     StatusCommand,

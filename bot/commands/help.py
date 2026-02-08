@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 """
 ===================================
-帮助命令
+幫助命令
 ===================================
 
-显示可用命令列表和使用说明。
+顯示可用命令列表和使用說明。
 """
 
 from typing import List
@@ -15,14 +15,14 @@ from bot.models import BotMessage, BotResponse
 
 class HelpCommand(BotCommand):
     """
-    帮助命令
+    幫助命令
     
-    显示所有可用命令的列表和使用说明。
-    也可以查看特定命令的详细帮助。
+    顯示所有可用命令的列表和使用說明。
+    也可以查看特定命令的詳細幫助。
     
     用法：
-        /help         - 显示所有命令
-        /help analyze - 显示 analyze 命令的详细帮助
+        /help         - 顯示所有命令
+        /help analyze - 顯示 analyze 命令的詳細幫助
     """
     
     @property
@@ -31,24 +31,24 @@ class HelpCommand(BotCommand):
     
     @property
     def aliases(self) -> List[str]:
-        return ["h", "帮助", "?"]
+        return ["h", "幫助", "?"]
     
     @property
     def description(self) -> str:
-        return "显示帮助信息"
+        return "顯示幫助信息"
     
     @property
     def usage(self) -> str:
         return "/help [命令名]"
     
     def execute(self, message: BotMessage, args: List[str]) -> BotResponse:
-        """执行帮助命令"""
-        # 延迟导入避免循环依赖
+        """執行幫助命令"""
+        # 延遲導入避免循環依賴
         from bot.dispatcher import get_dispatcher
         
         dispatcher = get_dispatcher()
         
-        # 如果指定了命令名，显示该命令的详细帮助
+        # 如果指定了命令名，顯示該命令的詳細幫助
         if args:
             cmd_name = args[0]
             command = dispatcher.get_command(cmd_name)
@@ -56,11 +56,11 @@ class HelpCommand(BotCommand):
             if command is None:
                 return BotResponse.error_response(f"未知命令: {cmd_name}")
             
-            # 构建详细帮助
+            # 構建詳細幫助
             help_text = self._format_command_help(command, dispatcher.command_prefix)
             return BotResponse.markdown_response(help_text)
         
-        # 显示所有命令列表
+        # 顯示所有命令列表
         commands = dispatcher.list_commands(include_hidden=False)
         prefix = dispatcher.command_prefix
         
@@ -70,17 +70,17 @@ class HelpCommand(BotCommand):
     def _format_help_list(self, commands: List[BotCommand], prefix: str) -> str:
         """格式化命令列表"""
         lines = [
-            "📚 **股票分析助手 - 命令帮助**",
+            "📚 **股票分析助手 - 命令幫助**",
             "",
             "可用命令：",
             "",
         ]
         
         for cmd in commands:
-            # 命令名和别名
+            # 命令名和別名
             aliases_str = ""
             if cmd.aliases:
-                # 过滤掉中文别名，只显示英文别名
+                # 過濾掉中文別名，只顯示英文別名
                 en_aliases = [a for a in cmd.aliases if a.isascii()]
                 if en_aliases:
                     aliases_str = f" ({', '.join(prefix + a for a in en_aliases[:2])})"
@@ -91,21 +91,21 @@ class HelpCommand(BotCommand):
         lines.extend([
             "",
             "---",
-            f"💡 输入 {prefix}help <命令名> 查看详细用法",
+            f"💡 輸入 {prefix}help <命令名> 查看詳細用法",
             "",
             "**示例：**",
             "",
-            f"• {prefix}analyze 301023 - 奕帆传动",
+            f"• {prefix}analyze 301023 - 奕帆傳動",
             "",
-            f"• {prefix}market - 查看大盘复盘",
+            f"• {prefix}market - 查看大盤覆盤",
             "",
-            f"• {prefix}batch - 批量分析自选股",
+            f"• {prefix}batch - 批量分析自選股",
         ])
         
         return "\n".join(lines)
     
     def _format_command_help(self, command: BotCommand, prefix: str) -> str:
-        """格式化单个命令的详细帮助"""
+        """格式化單個命令的詳細幫助"""
         lines = [
             f"📖 **{prefix}{command.name}** - {command.description}",
             "",
@@ -113,15 +113,15 @@ class HelpCommand(BotCommand):
             "",
         ]
         
-        # 别名
+        # 別名
         if command.aliases:
             aliases = [f"`{prefix}{a}`" if a.isascii() else f"`{a}`" for a in command.aliases]
-            lines.append(f"**别名：** {', '.join(aliases)}")
+            lines.append(f"**別名：** {', '.join(aliases)}")
             lines.append("")
         
-        # 权限
+        # 權限
         if command.admin_only:
-            lines.append("⚠️ **需要管理员权限**")
+            lines.append("⚠️ **需要管理員權限**")
             lines.append("")
         
         return "\n".join(lines)
