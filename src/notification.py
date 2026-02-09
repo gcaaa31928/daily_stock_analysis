@@ -2498,12 +2498,20 @@ class NotificationService:
                 }
             }
         
-        # Discord Webhook
+        # Discord Webhook（使用 Embed 格式）
         if 'discord.com/api/webhooks' in url_lower or 'discordapp.com/api/webhooks' in url_lower:
-            # Discord 限制 2000 字符
-            truncated = content[:1900] + "..." if len(content) > 1900 else content
+            discord_content = self._convert_to_discord_markdown(content)
+            # Embed description 限制 4096 字元
+            truncated = discord_content[:4000] + "..." if len(discord_content) > 4000 else discord_content
+            date_str = datetime.now().strftime('%Y-%m-%d')
             return {
-                "content": truncated
+                "embeds": [{
+                    "title": f"股票分析報告 - {date_str}",
+                    "description": truncated,
+                    "color": 0x2F80ED,
+                    "footer": {"text": "由 A股分析機器人 生成"},
+                    "timestamp": datetime.now().isoformat()
+                }]
             }
         
         # Slack Incoming Webhook
@@ -2858,48 +2866,162 @@ class NotificationService:
         logger.warning("AstrBot 配置不完整，跳過推送")
         return False
     
+    def _convert_to_discord_markdown(self, text: str) -> str:
+        """
+        將標準 Markdown 轉換為 Discord 支持的格式
+
+        Discord Markdown 限制：
+        - 不支持表格語法
+        - 支持 # ## ### 標題（會加粗顯示）
+        - 支持 **bold** *italic* ~~strikethrough~~
+        - 支持 > 引用、``` 代碼塊、- 列表
+        """
+        result = text
+
+        # 轉換表格為易讀的純文字格式
+        lines = result.split('\n')
+        converted_lines = []
+        i = 0
+        while i < len(lines):
+            line = lines[i]
+            # 偵測表格分隔行 |---|---|
+            if re.match(r'^\|[-:\s|]+\|$', line):
+                i += 1
+                continue
+            # 轉換表格資料行 | a | b | -> a | b
+            if re.match(r'^\|(.+)\|$', line):
+                cells = [c.strip() for c in line.strip('|').split('|')]
+                converted_lines.append('  '.join(cells))
+            else:
+                converted_lines.append(line)
+            i += 1
+
+        result = '\n'.join(converted_lines)
+
+        # 清理多餘空行
+        result = re.sub(r'\n{3,}', '\n\n', result)
+
+        return result.strip()
+
+    def _split_discord_content(self, content: str, max_length: int = 4000) -> list:
+        """
+        將長內容按段落分割為多個片段，每段不超過 max_length
+
+        Args:
+            content: 完整內容
+            max_length: 每段最大字元數（Embed description 限制 4096）
+
+        Returns:
+            分割後的內容列表
+        """
+        if len(content) <= max_length:
+            return [content]
+
+        chunks = []
+        # 優先按 --- 分隔線分割
+        sections = content.split('\n---\n')
+
+        current_chunk = []
+        current_length = 0
+
+        for section in sections:
+            section_text = section.strip()
+            # +5 for "\n---\n" separator
+            if current_length + len(section_text) + 5 > max_length and current_chunk:
+                chunks.append('\n---\n'.join(current_chunk))
+                current_chunk = []
+                current_length = 0
+
+            # 如果單個 section 就超過限制，按行分割
+            if len(section_text) > max_length:
+                if current_chunk:
+                    chunks.append('\n---\n'.join(current_chunk))
+                    current_chunk = []
+                    current_length = 0
+
+                lines = section_text.split('\n')
+                line_chunk = []
+                line_length = 0
+                for line in lines:
+                    if line_length + len(line) + 1 > max_length and line_chunk:
+                        chunks.append('\n'.join(line_chunk))
+                        line_chunk = []
+                        line_length = 0
+                    line_chunk.append(line)
+                    line_length += len(line) + 1
+                if line_chunk:
+                    current_chunk = ['\n'.join(line_chunk)]
+                    current_length = line_length
+            else:
+                current_chunk.append(section_text)
+                current_length += len(section_text) + 5
+
+        if current_chunk:
+            chunks.append('\n---\n'.join(current_chunk))
+
+        return chunks
+
     def _send_discord_webhook(self, content: str) -> bool:
         """
-        使用 Webhook 發送消息到 Discord
-        
-        Discord Webhook 支持 Markdown 格式
-        
+        使用 Webhook 發送消息到 Discord（使用 Embed 格式）
+
+        Discord Embed 支持更好的 Markdown 渲染，description 上限 4096 字元
+
         Args:
             content: Markdown 格式的消息內容
-            
+
         Returns:
             是否發送成功
         """
         try:
-            payload = {
-                'content': content,
-                'username': 'A股分析機器人',
-                'avatar_url': 'https://picsum.photos/200'
-            }
-            
-            response = requests.post(
-                self._discord_config['webhook_url'],
-                json=payload,
-                timeout=10
-            )
-            
-            if response.status_code in [200, 204]:
-                logger.info("Discord Webhook 消息發送成功")
-                return True
-            else:
-                logger.error(f"Discord Webhook 發送失敗: {response.status_code} {response.text}")
-                return False
+            discord_content = self._convert_to_discord_markdown(content)
+            chunks = self._split_discord_content(discord_content)
+
+            all_success = True
+            for i, chunk in enumerate(chunks):
+                embed = {
+                    'description': chunk,
+                    'color': 0x2F80ED,  # 藍色
+                }
+                # 第一個 embed 加上標題
+                if i == 0:
+                    date_str = datetime.now().strftime('%Y-%m-%d')
+                    embed['title'] = f'股票分析報告 - {date_str}'
+                # 最後一個 embed 加上 footer
+                if i == len(chunks) - 1:
+                    embed['footer'] = {'text': f'由 A股分析機器人 生成'}
+                    embed['timestamp'] = datetime.now().isoformat()
+
+                payload = {
+                    'username': 'A股分析機器人',
+                    'avatar_url': 'https://picsum.photos/200',
+                    'embeds': [embed]
+                }
+
+                response = requests.post(
+                    self._discord_config['webhook_url'],
+                    json=payload,
+                    timeout=10
+                )
+
+                if response.status_code not in [200, 204]:
+                    logger.error(f"Discord Webhook 發送失敗 (chunk {i+1}/{len(chunks)}): {response.status_code} {response.text}")
+                    all_success = False
+
+            if all_success:
+                logger.info(f"Discord Webhook 消息發送成功（共 {len(chunks)} 段）")
+            return all_success
         except Exception as e:
             logger.error(f"Discord Webhook 發送異常: {e}")
             return False
     
     def _send_discord_bot(self, content: str) -> bool:
         """
-        使用 Bot API 發送消息到 Discord
-        
+        使用 Bot API 發送消息到 Discord（使用 Embed 格式）
+
         Args:
             content: Markdown 格式的消息內容
-            
+
         Returns:
             是否發送成功
         """
@@ -2908,20 +3030,38 @@ class NotificationService:
                 'Authorization': f'Bot {self._discord_config["bot_token"]}',
                 'Content-Type': 'application/json'
             }
-            
-            payload = {
-                'content': content
-            }
-            
+
+            discord_content = self._convert_to_discord_markdown(content)
+            chunks = self._split_discord_content(discord_content)
+
             url = f'https://discord.com/api/v10/channels/{self._discord_config["channel_id"]}/messages'
-            response = requests.post(url, json=payload, headers=headers, timeout=10)
-            
-            if response.status_code == 200:
-                logger.info("Discord Bot 消息發送成功")
-                return True
-            else:
-                logger.error(f"Discord Bot 發送失敗: {response.status_code} {response.text}")
-                return False
+            all_success = True
+
+            for i, chunk in enumerate(chunks):
+                embed = {
+                    'description': chunk,
+                    'color': 0x2F80ED,
+                }
+                if i == 0:
+                    date_str = datetime.now().strftime('%Y-%m-%d')
+                    embed['title'] = f'股票分析報告 - {date_str}'
+                if i == len(chunks) - 1:
+                    embed['footer'] = {'text': '由 A股分析機器人 生成'}
+                    embed['timestamp'] = datetime.now().isoformat()
+
+                payload = {
+                    'embeds': [embed]
+                }
+
+                response = requests.post(url, json=payload, headers=headers, timeout=10)
+
+                if response.status_code != 200:
+                    logger.error(f"Discord Bot 發送失敗 (chunk {i+1}/{len(chunks)}): {response.status_code} {response.text}")
+                    all_success = False
+
+            if all_success:
+                logger.info(f"Discord Bot 消息發送成功（共 {len(chunks)} 段）")
+            return all_success
         except Exception as e:
             logger.error(f"Discord Bot 發送異常: {e}")
             return False
