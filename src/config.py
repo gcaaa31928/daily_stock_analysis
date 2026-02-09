@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 ===================================
-A股自選股智能分析系統 - 配置管理模組
+台股自選股智能分析系統 - 配置管理模組
 ===================================
 
 職責：
@@ -150,7 +150,7 @@ class Config:
     # === 定時任務配置 ===
     schedule_enabled: bool = False            # 是否啟用定時任務
     schedule_time: str = "18:00"              # 每日推送時間（HH:MM 格式）
-    market_review_enabled: bool = True        # 是否啟用大盤覆盤
+    market_review_enabled: bool = True        # 是否啟用台股覆盤
 
     # === 即時行情增強資料配置 ===
     # 即時行情開關（關閉後使用歷史收盤價進行分析）
@@ -170,7 +170,7 @@ class Config:
     circuit_breaker_cooldown: int = 300
 
     # Discord 機器人狀態
-    discord_bot_status: str = "A股智能分析 | /help"
+    discord_bot_status: str = "台股智能分析 | /help"
 
     # === 流控配置（防封禁關鍵參數）===
     # Akshare 請求間隔範圍（秒）
@@ -407,7 +407,7 @@ class Config:
             # Telegram
             telegram_webhook_secret=os.getenv('TELEGRAM_WEBHOOK_SECRET'),
             # Discord 機器人擴展配置
-            discord_bot_status=os.getenv('DISCORD_BOT_STATUS', 'A股智能分析 | /help'),
+            discord_bot_status=os.getenv('DISCORD_BOT_STATUS', '台股智能分析 | /help'),
             # 即時行情增強資料配置
             enable_realtime_quote=os.getenv('ENABLE_REALTIME_QUOTE', 'true').lower() == 'true',
             enable_chip_distribution=os.getenv('ENABLE_CHIP_DISTRIBUTION', 'true').lower() == 'true',

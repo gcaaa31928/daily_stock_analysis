@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 """
 ===================================
-大盤覆盤命令
+台股覆盤命令
 ===================================
 
-執行大盤覆盤分析，生成市場概覽報告。
+執行台股覆盤分析，生成市場概覽報告。
 """
 
 import logging
@@ -19,16 +19,16 @@ logger = logging.getLogger(__name__)
 
 class MarketCommand(BotCommand):
     """
-    大盤覆盤命令
+    台股覆盤命令
     
-    執行大盤覆盤分析，包括：
+    執行台股覆盤分析，包括：
     - 主要指數表現
     - 板塊熱點
     - 市場情緒
     - 後市展望
     
     用法：
-        /market - 執行大盤覆盤
+        /market - 執行台股覆盤
     """
 
     @property
@@ -41,15 +41,15 @@ class MarketCommand(BotCommand):
 
     @property
     def description(self) -> str:
-        return "大盤覆盤分析"
+        return "台股覆盤分析"
 
     @property
     def usage(self) -> str:
         return "/market"
 
     def execute(self, message: BotMessage, args: List[str]) -> BotResponse:
-        """執行大盤覆盤命令"""
-        logger.info(f"[MarketCommand] 開始大盤覆盤分析")
+        """執行台股覆盤命令"""
+        logger.info(f"[MarketCommand] 開始台股覆盤分析")
 
         # 在後臺線程中執行復盤（避免阻塞）
         thread = threading.Thread(
@@ -60,7 +60,7 @@ class MarketCommand(BotCommand):
         thread.start()
 
         return BotResponse.markdown_response(
-            "✅ **大盤覆盤任務已啟動**\n\n"
+            "✅ **台股覆盤任務已啟動**\n\n"
             "正在分析：\n"
             "• 主要指數表現\n"
             "• 板塊熱點分析\n"
@@ -70,7 +70,7 @@ class MarketCommand(BotCommand):
         )
 
     def _run_market_review(self, message: BotMessage) -> None:
-        """後臺執行大盤覆盤"""
+        """後臺執行台股覆盤"""
         try:
             from src.config import get_config
             from src.notification import NotificationService
@@ -106,12 +106,12 @@ class MarketCommand(BotCommand):
 
             if review_report:
                 # 推送結果
-                report_content = f"🎯 **大盤覆盤**\n\n{review_report}"
+                report_content = f"🎯 **台股覆盤**\n\n{review_report}"
                 notifier.send(report_content)
-                logger.info("[MarketCommand] 大盤覆盤完成並已推送")
+                logger.info("[MarketCommand] 台股覆盤完成並已推送")
             else:
-                logger.warning("[MarketCommand] 大盤覆盤返回空結果")
+                logger.warning("[MarketCommand] 台股覆盤返回空結果")
 
         except Exception as e:
-            logger.error(f"[MarketCommand] 大盤覆盤失敗: {e}")
+            logger.error(f"[MarketCommand] 台股覆盤失敗: {e}")
             logger.exception(e)

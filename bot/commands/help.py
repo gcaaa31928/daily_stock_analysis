@@ -97,7 +97,7 @@ class HelpCommand(BotCommand):
             "",
             f"• {prefix}analyze 301023 - 奕帆傳動",
             "",
-            f"• {prefix}market - 查看大盤覆盤",
+            f"• {prefix}market - 查看台股覆盤",
             "",
             f"• {prefix}batch - 批量分析自選股",
         ])

@@ -242,14 +242,10 @@ class YfinanceFetcher(BaseFetcher):
         """
         import yfinance as yf
 
-        # 映射關係：akshare代碼 -> (yfinance代碼, 名稱)
+        # 映射關係：內部代碼 -> (yfinance代碼, 名稱)
         yf_mapping = {
-            'sh000001': ('000001.SS', '上證指數'),
-            'sz399001': ('399001.SZ', '深證成指'),
-            'sz399006': ('399006.SZ', '創業板指'),
-            'sh000688': ('000688.SS', '科創50'),
-            'sh000016': ('000016.SS', '上證50'),
-            'sh000300': ('000300.SS', '滬深300'),
+            'TWII': ('^TWII', '加權指數'),
+            'TWTC': ('^TWTC', '櫃買指數'),
         }
 
         results = []

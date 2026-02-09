@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 ===================================
-A股自選股智能分析系統 - 主調度程序
+台股自選股智能分析系統 - 主調度程序
 ===================================
 
 職責：
@@ -60,7 +60,7 @@ logger = logging.getLogger(__name__)
 def parse_arguments() -> argparse.Namespace:
     """解析命令列參數"""
     parser = argparse.ArgumentParser(
-        description='A股自選股智能分析系統',
+        description='台股自選股智能分析系統',
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog='''
 示例:
@@ -71,7 +71,7 @@ def parse_arguments() -> argparse.Namespace:
   python main.py --no-notify        # 不發送推送通知
   python main.py --single-notify    # 啟用單股推送模式（每分析完一隻立即推送）
   python main.py --schedule         # 啟用定時任務模式
-  python main.py --market-review    # 僅運行大盤覆盤
+  python main.py --market-review    # 僅運行台股覆盤
         '''
     )
 
@@ -121,13 +121,13 @@ def parse_arguments() -> argparse.Namespace:
     parser.add_argument(
         '--market-review',
         action='store_true',
-        help='僅運行大盤覆盤分析'
+        help='僅運行台股覆盤分析'
     )
 
     parser.add_argument(
         '--no-market-review',
         action='store_true',
-        help='跳過大盤覆盤分析'
+        help='跳過台股覆盤分析'
     )
 
     parser.add_argument(
@@ -183,7 +183,7 @@ def run_full_analysis(
     stock_codes: Optional[List[str]] = None
 ):
     """
-    執行完整的分析流程（個股 + 大盤覆盤）
+    執行完整的分析流程（個股 + 台股覆盤）
 
     這是定時任務調用的主函數
     """
@@ -215,10 +215,10 @@ def run_full_analysis(
         # Issue #128: 分析間隔 - 在個股分析和大盤分析之間添加延遲
         analysis_delay = getattr(config, 'analysis_delay', 0)
         if analysis_delay > 0 and config.market_review_enabled and not args.no_market_review:
-            logger.info(f"等待 {analysis_delay} 秒後執行大盤覆盤（避免API限流）...")
+            logger.info(f"等待 {analysis_delay} 秒後執行台股覆盤（避免API限流）...")
             time.sleep(analysis_delay)
 
-        # 2. 運行大盤覆盤（如果啟用且不是僅個股模式）
+        # 2. 運行台股覆盤（如果啟用且不是僅個股模式）
         market_report = ""
         if config.market_review_enabled and not args.no_market_review:
             # 只調用一次，並獲取結果
@@ -250,17 +250,17 @@ def run_full_analysis(
             if feishu_doc.is_configured() and (results or market_report):
                 logger.info("正在創建飛書雲文檔...")
 
-                # 1. 準備標題 "01-01 13:01大盤覆盤"
+                # 1. 準備標題 "01-01 13:01台股覆盤"
                 tz_cn = timezone(timedelta(hours=8))
                 now = datetime.now(tz_cn)
-                doc_title = f"{now.strftime('%Y-%m-%d %H:%M')} 大盤覆盤"
+                doc_title = f"{now.strftime('%Y-%m-%d %H:%M')} 台股覆盤"
 
-                # 2. 準備內容 (拼接個股分析和大盤覆盤)
+                # 2. 準備內容 (拼接個股分析和台股覆盤)
                 full_content = ""
 
-                # 添加大盤覆盤內容（如果有）
+                # 添加台股覆盤內容（如果有）
                 if market_report:
-                    full_content += f"# 📈 大盤覆盤\n\n{market_report}\n\n---\n\n"
+                    full_content += f"# 📈 台股覆盤\n\n{market_report}\n\n---\n\n"
 
                 # 添加個股決策儀表盤（使用 NotificationService 生成）
                 if results:
@@ -359,7 +359,7 @@ def main() -> int:
     setup_logging(log_prefix="stock_analysis", debug=args.debug, log_dir=config.log_dir)
 
     logger.info("=" * 60)
-    logger.info("A股自選股智能分析系統 啟動")
+    logger.info("台股自選股智能分析系統 啟動")
     logger.info(f"運行時間: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     logger.info("=" * 60)
 
@@ -420,9 +420,9 @@ def main() -> int:
         return 0
 
     try:
-        # 模式1: 僅大盤覆盤
+        # 模式1: 僅台股覆盤
         if args.market_review:
-            logger.info("模式: 僅大盤覆盤")
+            logger.info("模式: 僅台股覆盤")
             notifier = NotificationService()
 
             # 初始化搜索服務和分析器（如果有配置）

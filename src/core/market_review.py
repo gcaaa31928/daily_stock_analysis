@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 """
 ===================================
-A股自选股智能分析系统 - 大盘复盘模块
+台股自選股智能分析系統 - 台股覆盤模組
 ===================================
 
-职责：
-1. 执行大盘复盘分析
-2. 生成复盘报告
-3. 保存和发送复盘报告
+職責：
+1. 執行台股覆盤分析
+2. 生成覆盤報告
+3. 保存和發送覆盤報告
 """
 
 import logging
@@ -30,18 +30,18 @@ def run_market_review(
     send_notification: bool = True
 ) -> Optional[str]:
     """
-    执行大盘复盘分析
-    
+    執行台股覆盤分析
+
     Args:
-        notifier: 通知服务
-        analyzer: AI分析器（可选）
-        search_service: 搜索服务（可选）
-        send_notification: 是否发送通知
-    
+        notifier: 通知服務
+        analyzer: AI分析器（可選）
+        search_service: 搜索服務（可選）
+        send_notification: 是否發送通知
+
     Returns:
-        复盘报告文本
+        覆盤報告文本
     """
-    logger.info("开始执行大盘复盘分析...")
+    logger.info("開始執行台股覆盤分析...")
     
     try:
         market_analyzer = MarketAnalyzer(
@@ -53,31 +53,31 @@ def run_market_review(
         review_report = market_analyzer.run_daily_review()
         
         if review_report:
-            # 保存报告到文件
+            # 保存報告到文件
             date_str = datetime.now().strftime('%Y%m%d')
             report_filename = f"market_review_{date_str}.md"
             filepath = notifier.save_report_to_file(
-                f"# 🎯 大盘复盘\n\n{review_report}", 
+                f"# 🎯 台股覆盤\n\n{review_report}",
                 report_filename
             )
-            logger.info(f"大盘复盘报告已保存: {filepath}")
+            logger.info(f"台股覆盤報告已保存: {filepath}")
             
             # 推送通知
             if send_notification and notifier.is_available():
-                # 添加标题
-                report_content = f"🎯 大盘复盘\n\n{review_report}"
-                
+                # 添加標題
+                report_content = f"🎯 台股覆盤\n\n{review_report}"
+
                 success = notifier.send(report_content)
                 if success:
-                    logger.info("大盘复盘推送成功")
+                    logger.info("台股覆盤推送成功")
                 else:
-                    logger.warning("大盘复盘推送失败")
+                    logger.warning("台股覆盤推送失敗")
             elif not send_notification:
-                logger.info("已跳过推送通知 (--no-notify)")
+                logger.info("已跳過推送通知 (--no-notify)")
             
             return review_report
         
     except Exception as e:
-        logger.error(f"大盘复盘分析失败: {e}")
+        logger.error(f"台股覆盤分析失敗: {e}")
     
     return None
