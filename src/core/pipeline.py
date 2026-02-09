@@ -291,6 +291,22 @@ class StockAnalysisPipeline:
                 result.current_price = realtime_data.get('price')
                 result.change_pct = realtime_data.get('change_pct')
 
+                # 提取原始新聞項目存入 result（按 url 去重，最多 8 條）
+                if intel_results:
+                    seen_urls = set()
+                    news_items = []
+                    for response in intel_results.values():
+                        if response and response.success and response.results:
+                            for r in response.results:
+                                if r.url and r.url not in seen_urls:
+                                    seen_urls.add(r.url)
+                                    news_items.append({
+                                        'title': r.title,
+                                        'url': r.url,
+                                        'source': r.source,
+                                    })
+                    result.news_items = news_items[:8]
+
             # Step 8: 保存分析历史记录
             if result:
                 try:

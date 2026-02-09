@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 ===================================
-A股自選股智能分析系統 - 通知層
+台股自選股智能分析系統 - 通知層
 ===================================
 
 職責：
@@ -667,7 +667,20 @@ class NotificationService:
                 if intel.get('latest_news'):
                     report_lines.append("")
                     report_lines.append(f"**📢 最新動態**: {intel['latest_news']}")
-                
+
+                # 相關新聞連結
+                news_items = getattr(result, 'news_items', [])
+                if news_items:
+                    report_lines.append("")
+                    report_lines.append("**📎 相關新聞**:")
+                    for item in news_items[:5]:
+                        title = item.get('title', '')
+                        url = item.get('url', '')
+                        if title and url:
+                            report_lines.append(f"- [{title}]({url})")
+                        elif title:
+                            report_lines.append(f"- {title}")
+
                 report_lines.append("")
             
             # ========== 核心結論 ==========
@@ -1126,7 +1139,24 @@ class NotificationService:
                 lines.append("✨ **利好催化**:")
                 for cat in catalysts[:3]:
                     lines.append(f"- {cat[:60]}")
-        
+
+        # 相關新聞連結（精簡版最多 3 條）
+        news_items = getattr(result, 'news_items', [])
+        if news_items:
+            if not info_added:
+                lines.append("### 📰 重要信息")
+                lines.append("")
+                info_added = True
+            lines.append("")
+            lines.append("📎 **相關新聞**:")
+            for item in news_items[:3]:
+                title = item.get('title', '')
+                url = item.get('url', '')
+                if title and url:
+                    lines.append(f"- [{title}]({url})")
+                elif title:
+                    lines.append(f"- {title}")
+
         if info_added:
             lines.append("")
         
@@ -1697,7 +1727,7 @@ class NotificationService:
                 "header": {
                     "title": {
                         "tag": "plain_text",
-                        "content": "A股智能分析報告"
+                        "content": "台股智能分析報告"
                     }
                 },
                 "elements": [
@@ -2509,7 +2539,7 @@ class NotificationService:
                     "title": f"股票分析報告 - {date_str}",
                     "description": truncated,
                     "color": 0x2F80ED,
-                    "footer": {"text": "由 A股分析機器人 生成"},
+                    "footer": {"text": "由 台股分析機器人 生成"},
                     "timestamp": datetime.now().isoformat()
                 }]
             }
@@ -2989,11 +3019,11 @@ class NotificationService:
                     embed['title'] = f'股票分析報告 - {date_str}'
                 # 最後一個 embed 加上 footer
                 if i == len(chunks) - 1:
-                    embed['footer'] = {'text': f'由 A股分析機器人 生成'}
+                    embed['footer'] = {'text': f'由 台股分析機器人 生成'}
                     embed['timestamp'] = datetime.now().isoformat()
 
                 payload = {
-                    'username': 'A股分析機器人',
+                    'username': '台股分析機器人',
                     'avatar_url': 'https://picsum.photos/200',
                     'embeds': [embed]
                 }
@@ -3046,7 +3076,7 @@ class NotificationService:
                     date_str = datetime.now().strftime('%Y-%m-%d')
                     embed['title'] = f'股票分析報告 - {date_str}'
                 if i == len(chunks) - 1:
-                    embed['footer'] = {'text': '由 A股分析機器人 生成'}
+                    embed['footer'] = {'text': '由 台股分析機器人 生成'}
                     embed['timestamp'] = datetime.now().isoformat()
 
                 payload = {

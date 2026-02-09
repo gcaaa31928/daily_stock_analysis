@@ -13,7 +13,7 @@ A股自選股智能分析系統 - AI分析層
 import json
 import logging
 import time
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Optional, Dict, Any, List
 from json_repair import repair_json
 
@@ -177,6 +177,7 @@ class AnalysisResult:
     company_highlights: str = ""  # 公司亮點/風險點
 
     # ========== 情緒面/消息面分析 ==========
+    news_items: List[Dict[str, str]] = field(default_factory=list)  # 原始新聞 [{title, url, source}]
     news_summary: str = ""  # 近期重要新聞/公告摘要
     market_sentiment: str = ""  # 市場情緒分析
     hot_topics: str = ""  # 相關熱點話題
@@ -220,6 +221,7 @@ class AnalysisResult:
             'fundamental_analysis': self.fundamental_analysis,
             'sector_position': self.sector_position,
             'company_highlights': self.company_highlights,
+            'news_items': self.news_items,
             'news_summary': self.news_summary,
             'market_sentiment': self.market_sentiment,
             'hot_topics': self.hot_topics,
